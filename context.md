@@ -54,6 +54,20 @@ Pages: `/` `/gallery/` `/film/` `/publications/` `/about/` `/contact/` `/disclai
   or the two diverge.
 - Pages preview build (`ASTRO_BASE=/martin-website`): 115 refs, 0 missing, noindex on, canonical
   → martin-richardson.com. VERIFIED 2026-09-15. Pages not enabled; workflow is manual-only.
+- **Holographic background + depth, 2026-09-15.** The live site's banner
+  (`holographic_diffraction_background-1080p-1.mp4`, 1080p 52 s 23 MB, from its Elementor
+  `background_video_link`) now sits fixed behind every page: `bg-holo-480.mp4` 1.7 MB on phones,
+  `bg-holo-720.mp4` 3.6 MB ≥ 900 px, silent H.264 Main + faststart, poster from t = 45 s. Perspective
+  stage recedes/tilts on scroll, idles in a slow 3D hover, tilts with the mouse on desktop. Content
+  blocks and gallery cards float at 3 rates (±48 px, halved < 820 px); bordered lists float whole.
+  Reduced motion or Data Saver → poster only, nothing floats. Pauses under the lightbox and in
+  background tabs. iOS autoplay blocked (Low Power Mode) → poster, plays on first touch.
+- **Phone compatibility, 2026-09-15:** `viewport-fit=cover` + safe-area insets (notch, landscape,
+  home bar), `lvh`/`dvh` with `vh` fallbacks, hover-play only on fine pointers, no tap highlight.
+  `scripts/device-test.mjs`: **169/169** across WebKit (iPhone SE, 15 Pro Max, 13 landscape, iPad
+  Mini) and Chromium (Galaxy S9+, Pixel 7, Galaxy Tab S4, desktop) — no sideways scroll on 7 pages,
+  right video size plays, float works, menu, form ≥ 16 px inputs, lightbox, reduced motion.
+  Emulated engines, not physical handsets. VERIFIED 2026-09-15.
 - **Review preview LIVE 2026-09-15:** `https://vivian4fb.github.io/martin-website/` (repo made
   public by Vivian). Served from the `gh-pages` branch (`4586792`, preview build of `4ffc418` with
   `.nojekyll`), not the Actions workflow — the gh PAT lacks Pages/Actions write (403). To update:

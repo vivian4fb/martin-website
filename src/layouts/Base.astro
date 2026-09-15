@@ -38,7 +38,7 @@ const person = {
 <html lang="en-GB">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <script is:inline>document.documentElement.classList.add('js');</script>
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
@@ -65,6 +65,28 @@ const person = {
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
+    <!-- Holographic diffraction background, from the banner on martin-richardson.com. -->
+    <div class="bg-stage" aria-hidden="true">
+      <div class="bg-depth">
+        <div class="bg-float">
+          <video
+            class="bg-video"
+            muted
+            loop
+            playsinline
+            autoplay
+            preload="none"
+            disablepictureinpicture
+            disableremoteplayback
+            tabindex="-1"
+            poster={url('/media/poster/bg-holo.jpg')}
+            data-src-hd={url('/media/video/bg-holo-720.mp4')}
+            data-src-sd={url('/media/video/bg-holo-480.mp4')}
+          ></video>
+        </div>
+      </div>
+      <div class="bg-scrim"></div>
+    </div>
     <Header />
     <main id="main">
       <slot />
@@ -73,6 +95,7 @@ const person = {
     <script>
       // Reveal-on-scroll and hover-preview for motion works.
       const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
       const io = new IntersectionObserver(
         (entries) => entries.forEach((e) => {
           if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
@@ -88,10 +111,82 @@ const person = {
           card.style.setProperty('--my', `${((ev.clientY - r.top) / r.height) * 100}%`);
         });
         const v = card.querySelector('video');
-        if (!v || reduce) return;
+        // Touch screens have no hover: a tap opens the lightbox instead.
+        if (!v || reduce || !finePointer) return;
         card.addEventListener('pointerenter', () => { v.play().catch(() => {}); });
         card.addEventListener('pointerleave', () => { v.pause(); v.currentTime = 0; });
       });
+
+      // ── Holographic background ──
+      // 480p on phones, 720p on wider screens. Reduced motion or Data Saver keeps the still poster.
+      const bg = document.querySelector<HTMLVideoElement>('.bg-video');
+      const depth = document.querySelector<HTMLElement>('.bg-depth');
+      const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+      if (bg && !reduce && !saveData) {
+        bg.muted = true;
+        bg.defaultMuted = true;
+        bg.src = (innerWidth >= 900 ? bg.dataset.srcHd : bg.dataset.srcSd) ?? '';
+        const play = () => { if (!document.hidden) bg.play().catch(() => {}); };
+        play();
+        // iOS Low Power Mode and some Android browsers block autoplay until the first touch.
+        addEventListener('touchstart', play, { once: true, passive: true });
+        addEventListener('pointerdown', play, { once: true });
+        document.addEventListener('visibilitychange', () => (document.hidden ? bg.pause() : play()));
+        // Nothing to see behind the lightbox, so save the battery while it is open.
+        const lb = document.querySelector('dialog.lightbox') as HTMLDialogElement | null;
+        if (lb) new MutationObserver(() => (lb.open ? bg.pause() : play())).observe(lb, { attributes: true, attributeFilter: ['open'] });
+      }
+
+      // ── Depth on scroll ──
+      // The background recedes as you scroll; content blocks float at slightly different depths.
+      if (!reduce && depth && CSS.supports('translate', '0 1px')) {
+        // Gallery cards float one by one. Bordered lists (figures, publications, timeline) float as a
+        // whole block, or their dividers would drift out of line.
+        const floaters = [
+          ...document.querySelectorAll<HTMLElement>('main > section > .wrap > *, main > .wrap > *, main > .page-head > *'),
+          ...document.querySelectorAll<HTMLElement>('.works > .card'),
+        ].filter((el) => !el.matches('.works') && !el.closest('dialog'));
+        const rates = [0.05, 0.1, 0.075];
+        const rate = new WeakMap<HTMLElement, number>();
+        const shift = new WeakMap<HTMLElement, number>();
+        const onScreen = new Set<HTMLElement>();
+        const io2 = new IntersectionObserver(
+          (entries) => entries.forEach((e) => (e.isIntersecting ? onScreen.add(e.target as HTMLElement) : onScreen.delete(e.target as HTMLElement))),
+          { rootMargin: '25% 0px' },
+        );
+        floaters.forEach((el) => {
+          el.classList.add('float');
+          rate.set(el, rates[[...el.parentElement!.children].indexOf(el) % rates.length]);
+          io2.observe(el);
+        });
+
+        let queued = false;
+        const update = () => {
+          queued = false;
+          const vh = innerHeight;
+          const k = innerWidth < 820 ? 0.5 : 1;
+          onScreen.forEach((el) => {
+            const r = el.getBoundingClientRect();
+            const offset = r.top - (shift.get(el) ?? 0) + r.height / 2 - vh / 2; // untransformed centre vs viewport centre
+            const y = Math.max(-48, Math.min(48, -offset * rate.get(el)! * k));
+            shift.set(el, y);
+            el.style.translate = `0 ${y.toFixed(1)}px`;
+          });
+          const max = document.documentElement.scrollHeight - vh;
+          depth.style.setProperty('--p', (max > 0 ? Math.min(1, scrollY / max) : 0).toFixed(4));
+        };
+        const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+        addEventListener('scroll', queue, { passive: true });
+        addEventListener('resize', queue);
+        update();
+
+        if (finePointer) {
+          addEventListener('pointermove', (e) => {
+            depth.style.setProperty('--tilt-x', `${((e.clientY / innerHeight) - 0.5) * -3}deg`);
+            depth.style.setProperty('--tilt-y', `${((e.clientX / innerWidth) - 0.5) * 3}deg`);
+          }, { passive: true });
+        }
+      }
     </script>
   </body>
 </html>

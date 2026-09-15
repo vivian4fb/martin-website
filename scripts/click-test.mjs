@@ -135,7 +135,7 @@ const watch = (page, label) => {
     await page.goto(BASE + p, { waitUntil: 'networkidle' });
     const m = await page.evaluate(() => {
       const vw = document.documentElement.clientWidth;
-      const over = [...document.querySelectorAll('body *')].filter((e) => { const r = e.getBoundingClientRect(); return r.width && (r.right > vw + 1 || r.left < -1) && getComputedStyle(e).position !== 'fixed' && !e.closest('dialog') && !e.matches('.skip'); }).map((e) => e.tagName + '.' + e.className).slice(0, 5);
+      const over = [...document.querySelectorAll('body *')].filter((e) => { const r = e.getBoundingClientRect(); return r.width && (r.right > vw + 1 || r.left < -1) && getComputedStyle(e).position !== 'fixed' && !e.closest('dialog') && !e.closest('.bg-stage') && !e.matches('.skip'); }).map((e) => e.tagName + '.' + e.className).slice(0, 5);
       return { vw, sw: document.documentElement.scrollWidth, over };
     });
     ok(`phone ${p} no horizontal overflow`, m.sw <= m.vw && m.over.length === 0, `vw ${m.vw}, scrollWidth ${m.sw}${m.over.length ? ', over: ' + m.over.join(' ') : ''}`);
