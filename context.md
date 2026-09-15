@@ -72,6 +72,10 @@ Pages: `/` `/gallery/` `/film/` `/publications/` `/about/` `/contact/` `/disclai
   public by Vivian). Served from the `gh-pages` branch (`b68c285`, preview build of `e1b4a75` with
   `.nojekyll`), not the Actions workflow — the gh PAT lacks Pages/Actions write (403). To update:
   build with `ASTRO_SITE`/`ASTRO_BASE`/`PUBLIC_NOINDEX`, push `dist` + `.nojekyll` to `gh-pages`.
+  **Build from PowerShell, not Git Bash:** Bash rewrote `/martin-website` to
+  `C:/Program Files/Git/martin-website` and `b68c285` shipped with every link broken (caught by
+  the live test). `astro.config.mjs` now throws on a malformed base. Grep `dist` for
+  `Program Files` before pushing.
   Live check: all pages + media 200/206, noindex on, canonical → martin-richardson.com, click-test
   46/46 against the live URL. VERIFIED 2026-09-15.
 - Production not deployed. The live WordPress site is untouched.
