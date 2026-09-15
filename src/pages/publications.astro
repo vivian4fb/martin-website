@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import { publications } from '../config';
+const books = publications.filter((p) => p.kind === 'Book').length;
+---
+<Base title="Publications" description="Books and writing by Martin Richardson on holography.">
+  <header class="page-head wrap">
+    <span class="eyebrow">Writing</span>
+    <h1 class="display"><em>Publications</em></h1>
+    <p class="lede">{books} books, seven patents and more than fifty papers on holographic imaging, its principles and its art.</p>
+  </header>
+
+  <div class="wrap" style="padding-bottom:clamp(72px,10vw,140px)">
+    <ol class="pubs">
+      {publications.map((p) => (
+        <li class="pub reveal">
+          {p.href ? (
+            <a class="pub-row" href={p.href} target="_blank" rel="noopener">
+              <span><span class="pub-title">{p.title} ↗</span>{p.note && <span class="pub-note">{p.note}</span>}</span>
+              <span class="pub-kind">{p.kind}</span>
+            </a>
+          ) : (
+            <div>
+              <span><span class="pub-title">{p.title}</span>{p.note && <span class="pub-note">{p.note}</span>}</span>
+              <span class="pub-kind">{p.kind}</span>
+            </div>
+          )}
+        </li>
+      ))}
+    </ol>
+  </div>
+</Base>

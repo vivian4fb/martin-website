@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import WorkCard from '../components/WorkCard.astro';
+import Lightbox from '../components/Lightbox.astro';
+import { works } from '../config';
+
+const filters = [
+  { key: 'all', label: 'All' },
+  { key: 'motion', label: 'Motion' },
+  { key: 'still', label: 'Stills' },
+  { key: 'film', label: 'Film' },
+];
+---
+<Base title="Gallery" description="Holographic works by Martin Richardson: motion studies, stills and film.">
+  <header class="page-head wrap">
+    <span class="eyebrow">Gallery</span>
+    <h1 class="display">Works in <em>light</em></h1>
+    <p class="lede">A hologram changes as you move around it. These recordings are the nearest a screen can come. Select any work to view it full size.</p>
+  </header>
+
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom:40px">
+      <div class="filters" role="group" aria-label="Filter works">
+        {filters.map((f, n) => <button data-filter={f.key} aria-pressed={n === 0 ? 'true' : 'false'}>{f.label}</button>)}
+      </div>
+      <span class="muted" style="font-size:13px"><span class="count">{works.length}</span> works</span>
+    </div>
+    <div class="works">
+      {works.map((w, i) => <WorkCard work={w} index={i} />)}
+    </div>
+  </div>
+
+  <section class="cta" style="padding-top:64px">
+    <div class="wrap">
+      <p class="lede" style="margin-inline:auto;max-width:40ch">Over eight hundred of Richardson’s holograms are held by the Science Museum, London, and can be viewed on request.</p>
+      <a class="link-arrow" href="https://collection.sciencemuseumgroup.org.uk/" target="_blank" rel="noopener">Science Museum Group collection</a>
+    </div>
+  </section>
+
+  <Lightbox />
+</Base>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.filters button');
+  const cards = document.querySelectorAll<HTMLElement>('.card[data-kind]');
+  const count = document.querySelector('.count');
+  buttons.forEach((b) =>
+    b.addEventListener('click', () => {
+      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      let shown = 0;
+      cards.forEach((c) => {
+        c.hidden = !(b.dataset.filter === 'all' || c.dataset.kind === b.dataset.filter);
+        if (!c.hidden) { shown++; c.classList.add('in'); }
+      });
+      if (count) count.textContent = String(shown);
+    }),
+  );
+</script>

@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import Quote from '../components/Quote.astro';
+import { bowieFilm, quotes, url } from '../config';
+---
+<Base title="David Bowie Film" description="Film of Martin Richardson’s holographic portrait of David Bowie." image={bowieFilm.poster}>
+  <header class="page-head wrap">
+    <span class="eyebrow">Film · {bowieFilm.duration}</span>
+    <h1 class="display">David <em>Bowie</em></h1>
+    <p class="lede">Richardson’s holographic portrait of David Bowie, on film.</p>
+  </header>
+
+  <div class="wrap">
+    <div class="film-player frame">
+      <video
+        src={bowieFilm.src}
+        poster={bowieFilm.poster}
+        controls
+        playsinline
+        preload="metadata"
+        width={bowieFilm.width}
+        height={bowieFilm.height}
+        aria-label={bowieFilm.title}
+      ></video>
+    </div>
+    <div class="film-meta">
+      <span>{bowieFilm.title}</span>
+      <span>{bowieFilm.duration}</span>
+      <span>720p</span>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap"><Quote {...quotes.bowie} /></div>
+  </section>
+
+  <section class="cta" style="padding-top:0">
+    <div class="wrap">
+      <a class="link-arrow" href={url('/gallery/')}>Continue to the gallery</a>
+    </div>
+  </section>
+</Base>

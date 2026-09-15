@@ -1,0 +1,137 @@
+---
+import Base from '../layouts/Base.astro';
+import Quote from '../components/Quote.astro';
+import WorkCard from '../components/WorkCard.astro';
+import Lightbox from '../components/Lightbox.astro';
+import { figures, sitters, quotes, works, publications, bowieFilm, url } from '../config';
+
+const selected = works.filter((w) => w.kind !== 'film').slice(0, 6);
+const hero = works.find((w) => w.slug === 'geisha-girl')!;
+---
+<Base>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Holographer · Emeritus Professor</span>
+        <h1 class="display">Martin<br /><em>Richardson</em></h1>
+        <p class="lede">Portraits recorded in light — depth, parallax and presence that a photograph cannot hold.</p>
+        <a class="link-arrow" href={url('/gallery/')}>Enter the gallery</a>
+      </div>
+      <figure class="hero-media frame">
+        <video
+          src={hero.src}
+          poster={hero.poster}
+          muted
+          loop
+          playsinline
+          autoplay
+          preload="metadata"
+          aria-label={hero.alt}
+        ></video>
+        <figcaption>{hero.title}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="figures">
+      {figures.map((f) => (
+        <div class="figure reveal">
+          <span class="figure-value">{f.value}</span>
+          <span class="figure-label">{f.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap split">
+      <figure class="reveal" style="margin:0">
+        <img src={url('/media/img/portrait-1200.jpg')} alt="Martin Richardson in his studio, framing the camera with his hands, surrounded by books and science-fiction figures." width="1200" height="804" loading="lazy" />
+      </figure>
+      <div class="prose reveal">
+        <span class="eyebrow">The practice</span>
+        <h2>The first doctorate in holography, and a lifetime of work since.</h2>
+        <p>Richardson completed the first PhD in Holography at the Royal College of Art in 1988. His research examined optical reduction — enlarging and shrinking images of the human form through complex optical systems recorded on silver-halide materials.</p>
+        <p>As Head of the Modern Holography Group at De Montfort University, Leicester, he taught a generation of students who went on to pioneer the medium. In 2023 the Science Museum, London, acquired his entire body of work for its permanent collection.</p>
+        <ul class="sitters" aria-label="Notable sitters">
+          {sitters.map((s) => <li>{s}</li>)}
+        </ul>
+        <p style="margin-top:32px"><a class="link-arrow" href={url('/about/')}>Biography</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="quote-band">
+    <div class="wrap"><Quote {...quotes.bowie} /></div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Selected works</span>
+          <h2 style="margin-top:20px;margin-bottom:0">Gallery</h2>
+        </div>
+        <a class="link-arrow" href={url('/gallery/')}>All works</a>
+      </div>
+      <div class="works compact">
+        {selected.map((w) => <WorkCard work={w} index={works.indexOf(w)} />)}
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap split flip">
+      <a class="film-player frame reveal" href={url('/film/')} aria-label="Watch the David Bowie film">
+        <img src={bowieFilm.poster} alt="David Bowie, in black and white, reaching a hand towards the lens." width="1280" height="720" loading="lazy" style="filter:none" />
+      </a>
+      <div class="reveal">
+        <span class="eyebrow">Film · {bowieFilm.duration}</span>
+        <h2 style="margin-top:20px">David Bowie</h2>
+        <p class="muted" style="max-width:44ch">Richardson’s holographic portrait of David Bowie, on film.</p>
+        <a class="link-arrow" href={url('/film/')}>Watch the film</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="quote-band">
+    <div class="wrap"><Quote {...quotes.self} /></div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Writing</span>
+          <h2 style="margin-top:20px;margin-bottom:0">Publications</h2>
+        </div>
+        <a class="link-arrow" href={url('/publications/')}>Full list</a>
+      </div>
+      <ol class="pubs">
+        {publications.slice(0, 4).map((p) => (
+          <li class="pub">
+            <div>
+              <span><span class="pub-title">{p.title}</span>{p.note && <span class="pub-note">{p.note}</span>}</span>
+              <span class="pub-kind">{p.kind}</span>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="quote-band">
+    <div class="wrap"><Quote {...quotes.blake} /></div>
+  </section>
+
+  <section class="cta">
+    <div class="wrap">
+      <span class="eyebrow">Enquiries</span>
+      <h2 style="margin-top:20px">Commissions, research and collection enquiries</h2>
+      <a class="btn" href={url('/contact/')}>Get in touch</a>
+    </div>
+  </section>
+
+  <Lightbox />
+</Base>

@@ -1,0 +1,67 @@
+---
+import { works } from '../config';
+const data = works.map(({ title, kind, src, poster, alt, duration, width, height }) => ({ title, kind, src, poster, alt, duration, width, height }));
+---
+<dialog class="lightbox" aria-label="Work viewer">
+  <div class="lb-inner">
+    <div class="lb-stage"></div>
+    <div class="lb-bar">
+      <div>
+        <p class="lb-title"></p>
+        <p class="lb-meta muted"></p>
+      </div>
+      <div class="lb-controls">
+        <button class="lb-prev" aria-label="Previous work">←</button>
+        <span class="lb-count muted"></span>
+        <button class="lb-next" aria-label="Next work">→</button>
+        <button class="lb-close" aria-label="Close viewer">Close</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script define:vars={{ data }}>
+  const dlg = document.querySelector('.lightbox');
+  const stage = dlg.querySelector('.lb-stage');
+  let i = 0;
+  let order = data.map((_, n) => n);
+
+  function show(n) {
+    i = (n + order.length) % order.length;
+    const w = data[order[i]];
+    stage.replaceChildren();
+    let el;
+    if (w.kind === 'still') {
+      el = document.createElement('img');
+      el.src = w.src; el.alt = w.alt;
+    } else {
+      el = document.createElement('video');
+      Object.assign(el, { src: w.src, poster: w.poster || '', controls: true, playsInline: true, autoplay: true, loop: w.kind === 'motion' });
+      el.muted = w.kind === 'motion';
+      el.setAttribute('aria-label', w.alt);
+    }
+    el.style.aspectRatio = `${w.width} / ${w.height}`;
+    stage.append(el);
+    dlg.querySelector('.lb-title').textContent = w.title;
+    dlg.querySelector('.lb-meta').textContent = [w.kind === 'still' ? 'Still' : w.kind === 'film' ? 'Film' : 'Motion', w.duration].filter(Boolean).join(' · ');
+    dlg.querySelector('.lb-count').textContent = `${i + 1} / ${order.length}`;
+  }
+
+  document.querySelectorAll('.card[data-index]').forEach((card) => {
+    card.addEventListener('click', () => {
+      const visible = [...document.querySelectorAll('.card[data-index]')].filter((c) => !c.hidden);
+      order = visible.map((c) => Number(c.dataset.index));
+      dlg.showModal();
+      show(order.indexOf(Number(card.dataset.index)));
+    });
+  });
+  dlg.querySelector('.lb-prev').addEventListener('click', () => show(i - 1));
+  dlg.querySelector('.lb-next').addEventListener('click', () => show(i + 1));
+  dlg.querySelector('.lb-close').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener('close', () => stage.replaceChildren());
+  dlg.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') show(i - 1);
+    if (e.key === 'ArrowRight') show(i + 1);
+  });
+</script>

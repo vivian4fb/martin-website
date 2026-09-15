@@ -1,0 +1,29 @@
+---
+import type { Work } from '../config';
+interface Props { work: Work; index: number; }
+const { work, index } = Astro.props;
+const label = work.kind === 'still' ? 'Still' : work.kind === 'film' ? 'Film' : 'Motion';
+---
+<button
+  class={`card reveal kind-${work.kind}`}
+  data-index={index}
+  data-kind={work.kind}
+  aria-label={`Open ${work.title}`}
+  style={`--ar:${work.width}/${work.height}`}
+>
+  <span class="card-media">
+    {work.kind === 'still' ? (
+      <img src={work.src} alt={work.alt} width={work.width} height={work.height} loading="lazy" decoding="async" />
+    ) : (
+      <>
+        <img src={work.poster} alt={work.alt} width={work.width} height={work.height} loading="lazy" decoding="async" />
+        <video src={work.src} muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+      </>
+    )}
+    <span class="sheen" aria-hidden="true"></span>
+  </span>
+  <span class="card-cap">
+    <span class="card-title">{work.title}</span>
+    <span class="card-kind">{label}{work.duration && ` · ${work.duration}`}</span>
+  </span>
+</button>

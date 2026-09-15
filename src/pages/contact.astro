@@ -1,0 +1,88 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../config';
+const direct = Boolean(site.web3formsKey);
+---
+<Base title="Contact" description="Contact Martin Richardson about commissions, research and collection enquiries.">
+  <header class="page-head wrap">
+    <span class="eyebrow">Contact</span>
+    <h1 class="display">Get in <em>touch</em></h1>
+    <p class="lede">For commissions, research collaboration, publications and enquiries about the collection.</p>
+  </header>
+
+  <div class="wrap split" style="align-items:start;padding-bottom:clamp(72px,10vw,140px)">
+    <div class="prose">
+      <p class="muted" style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px">Email</p>
+      <p><a class="link-arrow" style="text-transform:none;letter-spacing:.02em;font-size:1.1rem" href={`mailto:${site.email}`}>{site.email}</a></p>
+      <p class="muted" style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin:40px 0 10px">The collection</p>
+      <p>Over eight hundred holograms are held by the Science Museum, London, and may be viewed on request.</p>
+      <p><a class="link-arrow" href={site.collectionUrl} target="_blank" rel="noopener">Science Museum Group</a></p>
+    </div>
+
+    <form class="form" id="enquiry" data-direct={direct ? 'true' : 'false'} data-email={site.email} novalidate>
+      {direct && <input type="hidden" name="access_key" value={site.web3formsKey} />}
+      {direct && <input type="hidden" name="subject" value="New enquiry — martin-richardson.com" />}
+      {direct && <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off" />}
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" name="name" autocomplete="name" required />
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required />
+      </div>
+      <div class="field">
+        <label for="phone">Phone <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+        <input id="phone" name="phone" type="tel" autocomplete="tel" />
+      </div>
+      <div class="field">
+        <label for="topic">Nature of enquiry</label>
+        <select id="topic" name="topic">
+          <option>Commission</option>
+          <option>Research or academic collaboration</option>
+          <option>Publications</option>
+          <option>Collection or exhibition</option>
+          <option>Press</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" required></textarea>
+      </div>
+      <button class="btn" type="submit">Send enquiry</button>
+      <p class="form-status" role="status" aria-live="polite"></p>
+      <p class="form-note">{direct ? 'Your message is sent directly to Martin Richardson.' : 'Sending opens your email application with the message ready to go.'}</p>
+    </form>
+  </div>
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('#enquiry')!;
+  const status = form.querySelector<HTMLElement>('.form-status')!;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+    const data = new FormData(form);
+
+    if (form.dataset.direct !== 'true') {
+      const body = `${data.get('message')}\n\n— ${data.get('name')}\n${data.get('email')}${data.get('phone') ? `\n${data.get('phone')}` : ''}`;
+      const subject = `${data.get('topic')} enquiry from ${data.get('name')}`;
+      window.location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      status.textContent = 'Your email application should now be open. If not, write to the address shown.';
+      return;
+    }
+
+    status.textContent = 'Sending…';
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message || `HTTP ${res.status}`);
+      form.reset();
+      status.textContent = 'Thank you — your enquiry has been sent.';
+    } catch (err) {
+      status.textContent = `The message could not be sent (${(err as Error).message}). Please email ${form.dataset.email} directly.`;
+    }
+  });
+</script>

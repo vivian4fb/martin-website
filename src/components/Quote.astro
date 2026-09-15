@@ -1,0 +1,8 @@
+---
+interface Props { text: string; by: string; role?: string; }
+const { text, by, role } = Astro.props;
+---
+<figure class="quote reveal">
+  <blockquote><p>{text}</p></blockquote>
+  <figcaption><span class="iris-line"></span>{by}{role && <span class="muted">, {role}</span>}</figcaption>
+</figure>

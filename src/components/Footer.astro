@@ -1,0 +1,24 @@
+---
+import { site, nav, url } from '../config';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <p class="footer-name">{site.name}</p>
+      <p class="muted">{site.role}</p>
+    </div>
+    <nav aria-label="Footer">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+    <div class="footer-meta">
+      <a href={`mailto:${site.email}`}>{site.email}</a>
+      <a href={site.collectionUrl} rel="noopener" target="_blank">Science Museum Group collection ↗</a>
+      <a href={url('/disclaimer/')}>Disclaimer</a>
+    </div>
+  </div>
+  <div class="wrap footer-base">
+    <span>© {year} {site.name}. All rights reserved.</span>
+    <span>Governed by the laws of England and Wales.</span>
+  </div>
+</footer>

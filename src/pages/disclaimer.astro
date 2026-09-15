@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../config';
+---
+<Base title="Disclaimer" description="Terms of use for martin-richardson.com.">
+  <header class="page-head wrap">
+    <span class="eyebrow">Legal</span>
+    <h1 class="display"><em>Disclaimer</em></h1>
+  </header>
+
+  <div class="wrap prose" style="padding-bottom:clamp(72px,10vw,140px)">
+    <p>This summary sets out the terms on which the site is offered. The full disclaimer is available <a class="link-arrow" style="padding-bottom:2px" href={site.disclaimerPdf} target="_blank" rel="noopener">as a PDF</a> and prevails over this summary.</p>
+    <p><strong>Information only.</strong> Content is provided for general information, may change without notice, and is offered without warranty as to accuracy, completeness or suitability. Use of it is at your own risk.</p>
+    <p><strong>Liability.</strong> {site.name} accepts no liability for any loss or damage — including indirect or consequential loss, or loss of data or profits — arising from use of this website, or for its temporary unavailability.</p>
+    <p><strong>External links.</strong> Links to other websites are provided for convenience. {site.name} has no control over their content and a link does not imply endorsement.</p>
+    <p><strong>Copyright.</strong> All material on this site, including the works, design, layout and graphics, is owned by or licensed to {site.name}. Reproduction is prohibited except as the copyright notice permits. Unauthorised use may give rise to a claim for damages and may be a criminal offence.</p>
+    <p><strong>Governing law.</strong> Use of this website, and any dispute arising from it, is subject to the laws of England and Wales.</p>
+  </div>
+</Base>

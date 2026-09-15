@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../config';
+---
+<Base title="Not found">
+  <header class="page-head wrap" style="min-height:60vh">
+    <span class="eyebrow">404</span>
+    <h1 class="display">Out of <em>focus</em></h1>
+    <p class="lede">This page does not exist, or has moved.</p>
+    <p style="margin-top:32px"><a class="link-arrow" href={url('/')}>Return home</a></p>
+  </header>
+</Base>

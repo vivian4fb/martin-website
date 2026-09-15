@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro';
+import Quote from '../components/Quote.astro';
+import { milestones, sitters, figures, quotes, site, url } from '../config';
+---
+<Base title="About" description="Biography of Martin Richardson, holographer and Emeritus Professor.">
+  <header class="page-head wrap">
+    <span class="eyebrow">Biography</span>
+    <h1 class="display">A life spent <em>with light</em></h1>
+  </header>
+
+  <div class="wrap split" style="align-items:start">
+    <figure class="reveal" style="margin:0">
+      <img src={url('/media/img/portrait-1200.jpg')} alt="Martin Richardson in his studio, framing the camera with his hands." width="1200" height="804" />
+    </figure>
+    <div class="prose reveal">
+      <p class="lede" style="max-width:none">Born in London in 1958, Martin Richardson has spent his working life on the science and art of holography.</p>
+      <p>His doctorate at the Royal College of Art — the first PhD awarded in holography — pursued optical reduction, using complex optical systems and silver-halide recording to enlarge or reduce the recorded human form.</p>
+      <p>Honours followed: the Millennium Fellowship, sponsored by the UK Government Commission, and in 2009 the Royal Photographic Society’s Saxby Medal for his contribution to holographic imaging and its science.</p>
+      <p>At De Montfort University, Leicester, he led the Modern Holography Group and mentored students who became pioneers of the field. He now holds the title of Emeritus Professor, and his current work brings advanced optics together with AI to produce holographic displays of convincing three-dimensional presence.</p>
+      <p>He has recorded holographic portraits of {sitters.slice(0, -1).join(', ')} and {sitters.at(-1)}.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <span class="eyebrow">Milestones</span>
+      <ol class="timeline" style="margin-top:32px">
+        {milestones.map((m) => (
+          <li class="reveal"><span class="yr">{m.year}</span><p>{m.text}</p></li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="figures">
+      {figures.map((f) => (
+        <div class="figure reveal"><span class="figure-value">{f.value}</span><span class="figure-label">{f.label}</span></div>
+      ))}
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap"><Quote {...quotes.blake} /></div>
+  </section>
+
+  <section class="quote-band cta">
+    <div class="wrap">
+      <span class="eyebrow">The collection</span>
+      <h2 style="margin-top:20px">Held at the Science Museum, London</h2>
+      <p class="muted" style="max-width:52ch;margin:0 auto 28px">Richardson’s entire body of work — more than eight hundred holograms — entered the permanent collection in 2023 and is available to the public on request.</p>
+      <a class="link-arrow" href={site.collectionUrl} target="_blank" rel="noopener">Visit the collection online</a>
+    </div>
+  </section>
+</Base>
