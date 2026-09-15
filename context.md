@@ -54,7 +54,13 @@ Pages: `/` `/gallery/` `/film/` `/publications/` `/about/` `/contact/` `/disclai
   or the two diverge.
 - Pages preview build (`ASTRO_BASE=/martin-website`): 115 refs, 0 missing, noindex on, canonical
   → martin-richardson.com. VERIFIED 2026-09-15. Pages not enabled; workflow is manual-only.
-- Not deployed. The live WordPress site is untouched.
+- **Review preview LIVE 2026-09-15:** `https://vivian4fb.github.io/martin-website/` (repo made
+  public by Vivian). Served from the `gh-pages` branch (`4586792`, preview build of `4ffc418` with
+  `.nojekyll`), not the Actions workflow — the gh PAT lacks Pages/Actions write (403). To update:
+  build with `ASTRO_SITE`/`ASTRO_BASE`/`PUBLIC_NOINDEX`, push `dist` + `.nojekyll` to `gh-pages`.
+  Live check: all pages + media 200/206, noindex on, canonical → martin-richardson.com, click-test
+  46/46 against the live URL. VERIFIED 2026-09-15.
+- Production not deployed. The live WordPress site is untouched.
 
 ## Fixed against the live site
 
