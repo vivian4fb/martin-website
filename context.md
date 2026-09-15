@@ -69,7 +69,7 @@ Pages: `/` `/gallery/` `/film/` `/publications/` `/about/` `/contact/` `/disclai
   right video size plays, float works, menu, form ≥ 16 px inputs, lightbox, reduced motion.
   Emulated engines, not physical handsets. VERIFIED 2026-09-15.
 - **Review preview LIVE 2026-09-15:** `https://vivian4fb.github.io/martin-website/` (repo made
-  public by Vivian). Served from the `gh-pages` branch (`4586792`, preview build of `4ffc418` with
+  public by Vivian). Served from the `gh-pages` branch (`b68c285`, preview build of `e1b4a75` with
   `.nojekyll`), not the Actions workflow — the gh PAT lacks Pages/Actions write (403). To update:
   build with `ASTRO_SITE`/`ASTRO_BASE`/`PUBLIC_NOINDEX`, push `dist` + `.nojekyll` to `gh-pages`.
   Live check: all pages + media 200/206, noindex on, canonical → martin-richardson.com, click-test
