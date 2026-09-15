@@ -22,6 +22,11 @@ export const site = {
 
   email: 'researchatmartin@gmail.com',
 
+  // WhatsApp enquiries. Number supplied by Vivian on 2026-09-15 (not on the live site).
+  // `whatsapp` is digits only, international format, for https://wa.me/ links.
+  whatsapp: '447710020669',
+  whatsappDisplay: '+44 7710 020669',
+
   // Contact form. Leave empty and the form opens the visitor's mail client
   // addressed to `email` (works today). Set PUBLIC_WEB3FORMS_KEY in .env to
   // deliver submissions straight to the inbox instead.

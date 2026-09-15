@@ -58,7 +58,8 @@ const data = works.map(({ title, kind, src, poster, alt, duration, width, height
   dlg.querySelector('.lb-prev').addEventListener('click', () => show(i - 1));
   dlg.querySelector('.lb-next').addEventListener('click', () => show(i + 1));
   dlg.querySelector('.lb-close').addEventListener('click', () => dlg.close());
-  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  // The dialog is full-screen and .lb-inner covers it, so "outside" means the empty stage or padding.
+  dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target === stage || e.target.classList.contains('lb-inner')) dlg.close(); });
   dlg.addEventListener('close', () => stage.replaceChildren());
   dlg.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') show(i - 1);

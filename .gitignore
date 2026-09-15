@@ -3,3 +3,4 @@ dist/
 .astro/
 .env
 media_source/
+logs/

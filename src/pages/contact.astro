@@ -14,12 +14,14 @@ const direct = Boolean(site.web3formsKey);
     <div class="prose">
       <p class="muted" style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px">Email</p>
       <p><a class="link-arrow" style="text-transform:none;letter-spacing:.02em;font-size:1.1rem" href={`mailto:${site.email}`}>{site.email}</a></p>
+      <p class="muted" style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin:40px 0 10px">WhatsApp</p>
+      <p><a class="link-arrow" style="text-transform:none;letter-spacing:.02em;font-size:1.1rem" href={`https://wa.me/${site.whatsapp}`} target="_blank" rel="noopener">{site.whatsappDisplay}</a></p>
       <p class="muted" style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin:40px 0 10px">The collection</p>
       <p>Over eight hundred holograms are held by the Science Museum, London, and may be viewed on request.</p>
       <p><a class="link-arrow" href={site.collectionUrl} target="_blank" rel="noopener">Science Museum Group</a></p>
     </div>
 
-    <form class="form" id="enquiry" data-direct={direct ? 'true' : 'false'} data-email={site.email} novalidate>
+    <form class="form" id="enquiry" data-direct={direct ? 'true' : 'false'} data-email={site.email} data-whatsapp={site.whatsapp} novalidate>
       {direct && <input type="hidden" name="access_key" value={site.web3formsKey} />}
       {direct && <input type="hidden" name="subject" value="New enquiry — martin-richardson.com" />}
       {direct && <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off" />}
@@ -50,9 +52,12 @@ const direct = Boolean(site.web3formsKey);
         <label for="message">Message</label>
         <textarea id="message" name="message" required></textarea>
       </div>
-      <button class="btn" type="submit">Send enquiry</button>
+      <div class="form-actions">
+        <button class="btn" type="submit" value="email">{direct ? 'Send enquiry' : 'Send by email'}</button>
+        <button class="btn btn-ghost" type="submit" value="whatsapp">Send on WhatsApp</button>
+      </div>
       <p class="form-status" role="status" aria-live="polite"></p>
-      <p class="form-note">{direct ? 'Your message is sent directly to Martin Richardson.' : 'Sending opens your email application with the message ready to go.'}</p>
+      <p class="form-note">{direct ? 'Send enquiry delivers your message directly to Martin Richardson.' : 'Send by email opens your email application with the message ready to go.'} Send on WhatsApp opens WhatsApp with the message ready to send; email is optional there.</p>
     </form>
   </div>
 </Base>
@@ -63,6 +68,26 @@ const direct = Boolean(site.web3formsKey);
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    if ((e as SubmitEvent).submitter?.getAttribute('value') === 'whatsapp') {
+      // WhatsApp needs only a name and a message; email and phone are added if given.
+      const required = ['name', 'message'].map((n) => form.elements.namedItem(n) as HTMLInputElement);
+      if (!required.every((el) => el.reportValidity())) return;
+      const data = new FormData(form);
+      const text = [
+        `${data.get('topic')} enquiry from ${data.get('name')}`,
+        '',
+        data.get('message'),
+        '',
+        `— ${data.get('name')}`,
+        data.get('email'),
+        data.get('phone'),
+      ].filter((line) => line !== null && (line === '' || String(line).trim() !== '')).join('\n').trim();
+      window.open(`https://wa.me/${form.dataset.whatsapp}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+      status.textContent = 'WhatsApp should now be open with your message. If not, message the number shown.';
+      return;
+    }
+
     if (!form.reportValidity()) return;
     const data = new FormData(form);
 

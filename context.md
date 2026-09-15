@@ -35,8 +35,26 @@ Pages: `/` `/gallery/` `/film/` `/publications/` `/about/` `/contact/` `/disclai
   Bowie film re-encoded 132.9 → 16.0 MB (−88 %, 720p CRF 27). VERIFIED 2026-09-15.
 - Rendered in headless Edge at 1440 px: home, gallery, about, contact, film. VERIFIED 2026-09-15.
 - At 400 px, 6 pages have content width = viewport with no element overflowing. VERIFIED 2026-09-15.
-  `/film/` at 400 px UNTESTED. Lightbox and hover-play not clicked through, UNTESTED.
-- Not a git repository. Not deployed. The live WordPress site is untouched.
+- Click-test `scripts/click-test.mjs` (Playwright + Edge, desktop 1440 px and emulated Pixel 7):
+  **46/46 pass** (41 + 5 WhatsApp) — hover-play/rewind, lightbox open/next/prev/wrap/keys/Escape/Close, all 10 works
+  load and fit, filters scope the lightbox, all 8 pages no overflow at 412 px, `/film/` loads, plays
+  and seeks, tap lightbox on phone, form validation and exact mailto subject/body. VERIFIED 2026-09-15.
+  Emulation only — a real phone is still UNTESTED.
+- **Fixed 2026-09-15:** backdrop click never closed the lightbox (the full-screen `.lb-inner`
+  covers the `<dialog>`, so `e.target === dlg` was unreachable). Now closes on empty stage/padding;
+  clicking the work itself does not.
+- **WhatsApp added 2026-09-15** (number `+44 7710 020669` supplied by Vivian, not on the live site —
+  Martin to confirm it may be published): link in the contact column and a *Send on WhatsApp*
+  form button that opens `wa.me/447710020669` with the enquiry pre-filled (name + message required,
+  email/phone optional). VERIFIED by click-test 2026-09-15.
+- **Git lives in the copy, not here.** On 2026-09-15 this folder was copied to
+  `C:\Users\vivia\Code\Business\Martin` (at Vivian's explicit request, despite the frozen-archive
+  rule) and pushed from there to private `github.com/vivian4fb/martin-website`, `main` @ `bb61b69`,
+  50 files. VERIFIED 2026-09-15. This Code2 folder has no `.git`; edits here must be copied across
+  or the two diverge.
+- Pages preview build (`ASTRO_BASE=/martin-website`): 115 refs, 0 missing, noindex on, canonical
+  → martin-richardson.com. VERIFIED 2026-09-15. Pages not enabled; workflow is manual-only.
+- Not deployed. The live WordPress site is untouched.
 
 ## Fixed against the live site
 
@@ -48,4 +66,7 @@ WordPress `sample-page` and `hello-world` stubs.
 1. Martin confirms the three titles, the quote correction, and supplies dates, media and
    higher-resolution originals (stills are 390 × 219 px).
 2. Click-test the lightbox and form on a real phone.
-3. Deploy to Cloudflare Pages preview, then point the domain.
+3. Enable Pages (Settings → Pages → GitHub Actions; private repo needs GitHub Pro), run
+   *Deploy review preview*, share `https://vivian4fb.github.io/martin-website/` with Martin.
+   The URL is public to anyone who has it.
+4. Production: Cloudflare Pages at the domain root, then point the domain.
