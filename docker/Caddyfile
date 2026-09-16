@@ -1,0 +1,24 @@
+# HTTPS termination for the domain. Caddy obtains and renews Let's Encrypt certificates itself,
+# so nothing in this file holds a secret. SITE_DOMAIN and ACME_EMAIL come from the environment
+# (see docker-compose.yml). Certificates are issued only once DNS for the domain points here.
+
+{
+	email {$ACME_EMAIL}
+}
+
+# Apex and www, with www redirected to the apex.
+{$SITE_DOMAIN}, www.{$SITE_DOMAIN} {
+	@www host www.{$SITE_DOMAIN}
+	redir @www https://{$SITE_DOMAIN}{uri} permanent
+
+	encode zstd gzip
+
+	# HSTS: one year, subdomains included. Remove `preload` unless the domain is submitted to the
+	# preload list — it is hard to undo.
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+	reverse_proxy site:8080 {
+		health_uri /healthz
+		health_interval 30s
+	}
+}

@@ -80,6 +80,34 @@ Pages: `/` `/gallery/` `/film/` `/publications/` `/about/` `/contact/` `/disclai
   46/46 against the live URL. VERIFIED 2026-09-15.
 - Production not deployed. The live WordPress site is untouched.
 
+## Docker
+
+*Added 2026-09-16.* Provisions for self-hosting at the domain, as an alternative to Cloudflare Pages.
+
+- `Dockerfile` — Node 22 build stage → `nginxinc/nginx-unprivileged:1.27-alpine` (uid 101, port
+  8080). Runtime holds only `dist` + nginx. Build asserts `index.html`, `404.html` and no
+  `Program Files` in `dist`. `HEALTHCHECK` hits `/`.
+- `docker/nginx.conf` — `/_astro/` immutable 1 y, `/media/` 7 d, HTML `no-cache`; gzip on text only
+  (video must stay uncompressed for byte-range seeking); `/healthz`; `404.html`; dotfiles 403.
+- `docker/security-headers.conf` — `nosniff`, `DENY` framing, referrer and permissions policy,
+  **included by every block that sets its own `add_header`**. nginx drops *all* inherited
+  `add_header`s in such a block, and `/` re-enters the `.html` location through `try_files`, so the
+  first build served every page with no security headers at all. Caught by the container test.
+- `docker/Caddyfile` + `docker-compose.yml` — Caddy terminates HTTPS, `www` → apex, HSTS, proxies to
+  `site:8080`; site has no published port, `read_only`, `cap_drop: ALL`, `no-new-privileges`.
+- `docker-compose.local.yml` — publishes `localhost:8080` for checking, no Caddy.
+- **Built, run and tested 2026-09-16** on Docker 29.7.2 (WSL2). Image **184 MB**, runs as
+  `uid=101(nginx)`, no Node in the runtime layer, `read_only` rootfs enforced (writes blocked),
+  HEALTHCHECK reports `healthy`. Against the container: **click-test 46/46, device-test 169/169**.
+  Headers confirmed on `/`, `/gallery/`, a 404, `/_astro/*.css` and `/media/*`; gzip on CSS, none on
+  video; range request → `206 Content-Range`; `/gallery` → `301`; `/.env` → `403`; `/healthz` → `ok`.
+  VERIFIED 2026-09-16.
+- **Port 8080 on this PC is taken** by the unrelated `oxyniti-web` container, so the local check
+  needs `SITE_PORT=<free port>`. The first run silently tested *that* site instead — read
+  `docker compose ... up` output, do not assume the port bound.
+- DNS must point at the host **before** `docker compose up` with Caddy, or Let's Encrypt fails and
+  rate-limits. WordPress stays live until the new site answers on the domain.
+
 ## Fixed against the live site
 
 Broken Science Museum link (`web.https://…`, now HTTP 200); nine dead "Read More" buttons; the

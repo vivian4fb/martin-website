@@ -1,0 +1,53 @@
+# Production stack for martin-richardson.com: nginx serving the built site, Caddy terminating HTTPS.
+#
+#   docker compose up -d --build                                   # site + HTTPS on the domain
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build site
+#                                                                  # site only, http://localhost:8080
+#
+# Point the domain's DNS at this host BEFORE starting the caddy service, or certificate issuance
+# fails and Let's Encrypt rate-limits repeated attempts. The WordPress host stays live until then.
+
+services:
+  site:
+    build:
+      context: .
+      args:
+        ASTRO_SITE: ${ASTRO_SITE:-https://martin-richardson.com}
+        PUBLIC_NOINDEX: ${PUBLIC_NOINDEX:-}
+        PUBLIC_WEB3FORMS_KEY: ${PUBLIC_WEB3FORMS_KEY:-}
+    image: martin-richardson-holography:latest
+    restart: unless-stopped
+    expose:
+      - "8080"
+    # No published port: in production Caddy is the only way in. docker-compose.local.yml adds one.
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - site
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-martin-richardson.com}
+      ACME_EMAIL: ${ACME_EMAIL:-researchatmartin@gmail.com}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  caddy_data:
+  caddy_config:

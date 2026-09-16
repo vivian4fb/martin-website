@@ -68,6 +68,40 @@ To build the preview locally in Git Bash, disable path conversion or the base is
 `MSYS_NO_PATHCONV=1 ASTRO_BASE=/martin-website npx astro build`.
 
 ## Deploy
+
+### Docker (own server, own domain)
+The site is static, so the image is nginx plus `./dist` — no Node at runtime. Caddy sits in front and
+obtains the HTTPS certificate itself.
+
+| File | Purpose |
+|---|---|
+| `Dockerfile` | Stage 1 builds with Node 22; stage 2 serves from `nginxinc/nginx-unprivileged` (uid 101, port 8080) |
+| `docker/nginx.conf` | Caching, gzip, security headers, `/healthz`, `404.html` |
+| `docker/security-headers.conf` | The security headers, included by every block that sets its own `add_header` — nginx drops inherited ones there |
+| `docker/Caddyfile` | HTTPS for the domain, `www` → apex, HSTS, proxy to `site:8080` |
+| `docker-compose.yml` | Production: `site` + `caddy` on ports 80/443 |
+| `docker-compose.local.yml` | Publishes the site on `localhost:8080` for checking, without Caddy |
+
+Check the production image locally:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build site
+BASE=http://localhost:8080 node scripts/click-test.mjs     # 46 checks
+docker compose -f docker-compose.yml -f docker-compose.local.yml down
+```
+
+Deploy to the domain, on a host with ports 80 and 443 free:
+```bash
+SITE_DOMAIN=martin-richardson.com ACME_EMAIL=you@example.org docker compose up -d --build
+```
+**Point the domain's DNS at the host first.** Caddy asks Let's Encrypt for a certificate on startup;
+if DNS still points at WordPress the request fails, and repeated failures hit a rate limit. Keep the
+WordPress host running until the new site answers on the domain.
+
+A placeholder in `src/` or `public/` fails the image build, as `npm run build` runs the placeholder
+check first. To deliver enquiries straight to the inbox rather than by mail client, pass the key at
+build time: `--build-arg PUBLIC_WEB3FORMS_KEY=…` (it is compiled into the page, so it is not a secret).
+
+### Hosted platforms
 Cloudflare Pages or Netlify: build command `npm run build`, output directory `dist`, no base path.
 Point the domain only after the new site is checked on its preview URL; the WordPress host stays live
 until then.

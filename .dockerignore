@@ -1,0 +1,19 @@
+# Keep the build context small and secrets out of the image.
+.git
+.github
+node_modules
+dist
+.astro
+logs
+media_source
+.env
+.env.*
+!.env.example
+*.log
+scripts/click-test.mjs
+scripts/device-test.mjs
+docker-compose*.yml
+Dockerfile
+.dockerignore
+README.md
+context.md
