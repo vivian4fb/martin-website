@@ -80,6 +80,27 @@ Pages: `/` `/gallery/` `/film/` `/publications/` `/about/` `/contact/` `/disclai
   46/46 against the live URL. VERIFIED 2026-09-15.
 - Production not deployed. The live WordPress site is untouched.
 
+## Opening monogram
+
+*Added 2026-09-16.* `src/components/Intro.astro`, rendered by `Base.astro` when a page passes
+`intro` — the home page only. An MR monogram in Cormorant Garamond (polished-platinum gradient,
+bevel highlight, narrow spectral flare, 1 px white edge) over two panels that slide apart at the
+seam between the letters, with a light flare along the cut; `main` settles forward behind it.
+
+- **Once per browser session.** An inline `<head>` check in `Base.astro` adds `.intro-skip` before
+  paint when `sessionStorage.mr-intro` is set or motion is reduced, so a returning visitor never
+  sees a flash of curtain. The component script repeats both checks defensively.
+- Skippable by pointer, key, wheel or touch; removed after ~2.4 s; a 5 s timer removes it whatever
+  happens; `<noscript>` hides it entirely. Never rendered on other pages.
+- **Rendered outside `main`.** `main` is a stacking context (`z-index: 1`), so a curtain inside it
+  sits *under* the sticky header however high its own `z-index`.
+- **`set:html` for the inline script.** As a child expression (`<script is:inline>{\`…\`}</script>`)
+  Astro emitted the backticks as literal text and the script never ran — the intro then replayed on
+  every load and locked scrolling under reduced motion.
+- Both suites wait via `settle()`. Note `waitForSelector(state: 'detached')` resolves *immediately*
+  when the element has not been parsed yet, which silently measured pages mid-curtain; the helper
+  now waits for `domcontentloaded` first, then for the node to go.
+
 ## Docker
 
 *Added 2026-09-16.* Provisions for self-hosting at the domain, as an alternative to Cloudflare Pages.

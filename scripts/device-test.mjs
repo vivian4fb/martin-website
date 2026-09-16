@@ -24,6 +24,17 @@ const MATRIX = [
 const results = [];
 const ok = (name, pass, detail = '') => { results.push({ name, pass }); console.log(`${pass ? 'PASS' : 'FAIL'}  ${name}${detail ? '  — ' + detail : ''}`); };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// The home page plays an opening animation that covers the screen; wait for it to clear.
+const settle = async (page) => {
+  // The intro markup is server-rendered, so once the DOM is parsed it is either present
+  // (playing) or already removed. Waiting on `state: 'detached'` alone is a trap: it resolves
+  // at once when the element has not been parsed yet, and measuring then catches the curtain.
+  await page.waitForLoadState('domcontentloaded').catch(() => {});
+  await page.waitForFunction(() => !document.querySelector('.intro'), null, { timeout: 9000 }).catch(() => {});
+  // The reveal animation scales <main> briefly; measuring during it reports phantom overflow.
+  await page.waitForFunction(() => !document.documentElement.classList.contains('intro-revealing'), null, { timeout: 5000 }).catch(() => {});
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))).catch(() => {});
+};
 
 const browsers = {
   webkit: await webkit.launch(),
@@ -40,6 +51,7 @@ for (const { engine, name, device } of MATRIX) {
 
   for (const p of PAGES) {
     await page.goto(BASE + p, { waitUntil: 'load' });
+    await settle(page);
     await sleep(400);
     const m = await page.evaluate(() => {
       const vw = document.documentElement.clientWidth;
@@ -53,6 +65,7 @@ for (const { engine, name, device } of MATRIX) {
 
   // Background video: right size chosen, covers the screen, plays (or poster stands in).
   await page.goto(BASE + '/', { waitUntil: 'load' });
+  await settle(page);
   const bg = await page.locator('.bg-video').evaluate(async (v) => {
     const deadline = Date.now() + 8000;
     while (v.readyState < 2 && !v.error && Date.now() < deadline) await new Promise((r) => setTimeout(r, 100));
@@ -105,6 +118,7 @@ for (const { engine, name, device } of MATRIX) {
   } else {
     ok(`${tag} desktop nav visible`, await page.locator('.site-nav a', { hasText: 'Contact' }).isVisible());
     await page.goto(BASE + '/contact/', { waitUntil: 'load' });
+    await settle(page);
   }
 
   // Contact: both send buttons reachable, inputs won't trigger iOS zoom (font ≥ 16px).
@@ -118,6 +132,7 @@ for (const { engine, name, device } of MATRIX) {
 
   // Lightbox by tap/click, pauses background, closes.
   await page.goto(BASE + '/gallery/', { waitUntil: 'load' });
+  await settle(page);
   const card = page.locator('.card[data-index]').first();
   await card.scrollIntoViewIfNeeded();
   isTouch ? await card.tap() : await card.click();
@@ -143,6 +158,7 @@ for (const engine of ['webkit', 'chromium']) {
   const ctx = await browsers[engine].newContext({ ...devices[engine === 'webkit' ? 'iPhone 15 Pro Max' : 'Pixel 7'], reducedMotion: 'reduce' });
   const page = await ctx.newPage();
   await page.goto(BASE + '/', { waitUntil: 'load' });
+  await settle(page);
   await page.evaluate(() => scrollTo(0, 1500)); await sleep(500);
   const r = await page.evaluate(() => ({ src: document.querySelector('.bg-video').getAttribute('src'), floats: document.querySelectorAll('.float').length, reveal: getComputedStyle(document.querySelector('.reveal')).opacity }));
   ok(`[${engine}] reduced motion: poster only, nothing floats, content visible`, !r.src && r.floats === 0 && r.reveal === '1', JSON.stringify(r));

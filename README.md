@@ -41,6 +41,16 @@ nothing that is not on the live site or supplied by Martin.
 5. **Higher-resolution media.** Stills are 390 × 219 px and four motion works are 640 × 480; they are
    soft at full screen. Originals from Martin would fix it.
 
+## Opening monogram
+`src/components/Intro.astro` plays an MR monogram that splits apart to reveal the site. It is
+rendered by `Base.astro` only for pages that pass `intro` — the home page — and only on a visitor's
+first home page of a browser session, tracked in `sessionStorage` as `mr-intro`. Any tap, click, key
+or scroll opens it at once; it clears itself after about 2.4 seconds, and never appears for a
+visitor who prefers reduced motion or has JavaScript off.
+
+To watch it again, open the home page in a new tab after clearing session storage, or use a private
+window. Timings and colours live in that one component.
+
 ## Contact form
 It works without any key: submitting opens the visitor's mail client, addressed to
 `researchatmartin@gmail.com`. For direct delivery, register that address at web3forms.com and put

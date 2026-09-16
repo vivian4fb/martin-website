@@ -6,6 +6,17 @@ const BASE = process.env.BASE || 'http://localhost:4321';
 const results = [];
 const ok = (name, pass, detail = '') => { results.push({ name, pass, detail }); console.log(`${pass ? 'PASS' : 'FAIL'}  ${name}${detail ? '  — ' + detail : ''}`); };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// The home page plays an opening animation that covers the screen; wait for it to clear.
+const settle = async (page) => {
+  // The intro markup is server-rendered, so once the DOM is parsed it is either present
+  // (playing) or already removed. Waiting on `state: 'detached'` alone is a trap: it resolves
+  // at once when the element has not been parsed yet, and measuring then catches the curtain.
+  await page.waitForLoadState('domcontentloaded').catch(() => {});
+  await page.waitForFunction(() => !document.querySelector('.intro'), null, { timeout: 9000 }).catch(() => {});
+  // The reveal animation scales <main> briefly; measuring during it reports phantom overflow.
+  await page.waitForFunction(() => !document.documentElement.classList.contains('intro-revealing'), null, { timeout: 5000 }).catch(() => {});
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))).catch(() => {});
+};
 
 for (let t = 0; t < 30; t++) { try { if ((await fetch(BASE + '/')).ok) break; } catch {} await sleep(500); }
 
@@ -22,6 +33,7 @@ const watch = (page, label) => {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage(); watch(page, 'desktop-gallery');
   await page.goto(BASE + '/gallery/', { waitUntil: 'networkidle' });
+  await settle(page);
   const cards = page.locator('.card[data-index]');
   const n = await cards.count();
   ok('gallery has cards', n > 0, `${n} cards`);
@@ -117,6 +129,7 @@ const watch = (page, label) => {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage(); watch(page, 'desktop-home');
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await settle(page);
   const c = page.locator('.card[data-index]');
   const cnt = await c.count();
   if (cnt) {
@@ -133,6 +146,7 @@ const watch = (page, label) => {
   const page = await ctx.newPage(); watch(page, 'phone');
   for (const p of ['/', '/gallery/', '/film/', '/publications/', '/about/', '/contact/', '/disclaimer/', '/nope-404/']) {
     await page.goto(BASE + p, { waitUntil: 'networkidle' });
+    await settle(page);
     const m = await page.evaluate(() => {
       const vw = document.documentElement.clientWidth;
       const over = [...document.querySelectorAll('body *')].filter((e) => { const r = e.getBoundingClientRect(); return r.width && (r.right > vw + 1 || r.left < -1) && getComputedStyle(e).position !== 'fixed' && !e.closest('dialog') && !e.closest('.bg-stage') && !e.matches('.skip'); }).map((e) => e.tagName + '.' + e.className).slice(0, 5);
@@ -142,6 +156,7 @@ const watch = (page, label) => {
   }
 
   await page.goto(BASE + '/film/', { waitUntil: 'networkidle' });
+  await settle(page);
   const film = await page.locator('.film-player video').evaluate(async (v) => {
     const deadline = Date.now() + 10000;
     while (v.readyState < 1 && !v.error && Date.now() < deadline) await new Promise((r) => setTimeout(r, 50));
@@ -159,6 +174,7 @@ const watch = (page, label) => {
   ok('phone /film/ plays and seeks (range requests)', seek.playedTo > 0 && seek.seekedTo > 1, JSON.stringify(seek));
 
   await page.goto(BASE + '/gallery/', { waitUntil: 'networkidle' });
+  await settle(page);
   const card = page.locator('.card[data-index]').nth(1);
   await card.scrollIntoViewIfNeeded();
   await card.tap();
@@ -179,6 +195,7 @@ const watch = (page, label) => {
 
   // nav menu on phone
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await settle(page);
   const navInfo = await page.evaluate(() => [...document.querySelectorAll('header a, header button')].map((e) => { const r = e.getBoundingClientRect(); const cs = getComputedStyle(e); return { t: (e.textContent || e.getAttribute('aria-label') || '').trim(), vis: r.width > 0 && cs.visibility !== 'hidden' && cs.display !== 'none', h: Math.round(r.height) }; }));
   console.log('      phone header controls:', JSON.stringify(navInfo));
   await ctx.close();
@@ -199,6 +216,7 @@ const watch = (page, label) => {
     try { Object.defineProperty(Location.prototype, 'href', { set(v) { window.__nav.push(v); if (!String(v).startsWith('mailto:')) desc.set.call(this, v); }, get() { return desc.get.call(this); }, configurable: true }); } catch (e) { window.__navErr = e.message; }
   });
   await page.goto(BASE + '/contact/', { waitUntil: 'networkidle' });
+  await settle(page);
   ok('contact form in mailto mode (no key)', (await page.locator('#enquiry').getAttribute('data-direct')) === 'false');
   await page.locator('#enquiry button[value=email]').click();
   ok('empty submit blocked by validation', (await page.evaluate(() => window.__nav.length)) === 0 && (await page.locator('.form-status').textContent()) === '');

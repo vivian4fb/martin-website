@@ -2,15 +2,18 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Intro from '../components/Intro.astro';
 import { site, figures, sitters, url } from '../config';
 
 interface Props {
   title?: string;
   description?: string;
   image?: string;
+  /** Play the opening monogram. The home page only, and only once per browser session. */
+  intro?: boolean;
 }
 
-const { title, description = site.description, image = url('/media/img/og.jpg') } = Astro.props;
+const { title, description = site.description, image = url('/media/img/og.jpg'), intro = false } = Astro.props;
 const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — Holography`;
 // Canonical always points at the production domain, without any preview base path.
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -62,8 +65,18 @@ const person = {
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap"
     />
     <script type="application/ld+json" set:html={JSON.stringify(person)} />
+    {/* Runs before first paint: a returning visitor, or one who wants less motion, never sees the
+        curtain at all. set:html keeps it verbatim — as a child expression Astro escapes the quotes. */}
+    {intro && (
+      <script
+        is:inline
+        set:html={`try{if(sessionStorage.getItem('mr-intro')==='1'||matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('intro-skip')}catch(e){}`}
+      />
+    )}
   </head>
   <body>
+    {/* Outside <main>: main is a stacking context, which would trap the curtain under the header. */}
+    {intro && <Intro />}
     <a class="skip" href="#main">Skip to content</a>
     <!-- Holographic diffraction background, from the banner on martin-richardson.com. -->
     <div class="bg-stage" aria-hidden="true">
