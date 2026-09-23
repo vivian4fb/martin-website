@@ -1,6 +1,6 @@
 # Martin — context
 
-*Updated 2026-09-15. State: ACTIVE — built locally, not deployed*
+*Updated 2026-09-23. State: ACTIVE — built locally, not deployed*
 
 ## What this is
 
@@ -43,15 +43,23 @@ Pages: `/` `/gallery/` `/film/` `/publications/` `/about/` `/contact/` `/disclai
 - **Fixed 2026-09-15:** backdrop click never closed the lightbox (the full-screen `.lb-inner`
   covers the `<dialog>`, so `e.target === dlg` was unreachable). Now closes on empty stage/padding;
   clicking the work itself does not.
-- **WhatsApp added 2026-09-15** (number `+44 7710 020669` supplied by Vivian, not on the live site —
-  Martin to confirm it may be published): link in the contact column and a *Send on WhatsApp*
-  form button that opens `wa.me/447710020669` with the enquiry pre-filled (name + message required,
-  email/phone optional). VERIFIED by click-test 2026-09-15.
+- **WhatsApp removed 2026-09-23.** The number, the contact-column link, the *Send on WhatsApp* form
+  button and its JS submit branch are gone from `config.ts` and `contact.astro`; email
+  (`researchatmartin@gmail.com`) is now the only contact channel. The 5 corresponding click-test
+  cases were dropped (46/46 above is now stale — 41 remain). Copied to the Code copy and pushed:
+  `main` @ `b100a83`. Build VERIFIED 2026-09-23 in both copies (8 pages, no `whatsapp`/`wa.me` left
+  in `dist`). The `gh-pages` preview below still shows the old WhatsApp build — not redeployed.
 - **Git lives in the copy, not here.** On 2026-09-15 this folder was copied to
   `C:\Users\vivia\Code\Business\Martin` (at Vivian's explicit request, despite the frozen-archive
-  rule) and pushed from there to private `github.com/vivian4fb/martin-website`, `main` @ `bb61b69`,
-  50 files. VERIFIED 2026-09-15. This Code2 folder has no `.git`; edits here must be copied across
-  or the two diverge.
+  rule) and pushed from there to private `github.com/vivian4fb/martin-website`. VERIFIED 2026-09-15.
+  This Code2 folder has no `.git`; edits here must be copied across or the two diverge.
+  **Divergence found 2026-09-23:** the Code copy already carried uncommitted, unpushed local edits
+  to `src/components/Intro.astro` and `src/layouts/Base.astro` (an intro-script refactor, moving the
+  monogram controller into `Base.astro`'s `<head>`) that were never copied back to this Code2 folder
+  and never committed. Only the 3 WhatsApp-removal files were copied across for the commit above;
+  those two files were left untouched in both places to avoid destroying that WIP. **Action needed:**
+  reconcile Intro.astro/Base.astro between the two copies before the next Martin session, or the WIP
+  risks being lost.
 - Pages preview build (`ASTRO_BASE=/martin-website`): 115 refs, 0 missing, noindex on, canonical
   → martin-richardson.com. VERIFIED 2026-09-15. Pages not enabled; workflow is manual-only.
 - **Holographic background + depth, 2026-09-15.** The live site's banner
