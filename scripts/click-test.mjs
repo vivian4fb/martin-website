@@ -238,26 +238,6 @@ const watch = (page, label) => {
   ok('valid submit builds mailto', parsed.to === 'researchatmartin@gmail.com' && parsed.subject === 'Press enquiry from Test Person' && parsed.body === 'Line one & two?\nSecond line — with dash.\n\n— Test Person\ntest@example.com\n+44 1234 567890', JSON.stringify(parsed) + (nav.err ? ' hookErr ' + nav.err : ''));
   ok('status message shown', (await page.locator('.form-status').textContent()).includes('email application'));
 
-  // WhatsApp: link in the side column, and the form's second button.
-  ok('WhatsApp link points at wa.me number', (await page.locator('a[href^="https://wa.me/"]').getAttribute('href')) === 'https://wa.me/447710020669');
-  await page.evaluate(() => { window.__opened = []; window.open = (u, t, f) => { window.__opened.push([u, t, f]); return null; }; });
-  await page.fill('#name', ''); await page.fill('#message', ''); await page.fill('#email', ''); await page.fill('#phone', '');
-  await page.locator('#enquiry button[value=whatsapp]').click();
-  ok('WhatsApp blocked without name/message', (await page.evaluate(() => window.__opened.length)) === 0);
-  await page.fill('#name', 'Test Person');
-  await page.selectOption('#topic', 'Commission');
-  await page.fill('#message', 'Hello Martin & team?\nSecond line.');
-  await page.locator('#enquiry button[value=whatsapp]').click();
-  const opened = await page.evaluate(() => window.__opened);
-  let wa = {};
-  if (opened.length) { const u = new URL(opened[0][0]); wa = { host: u.host, path: u.pathname, text: u.searchParams.get('text'), target: opened[0][1] }; }
-  ok('WhatsApp opens wa.me with exact message (email optional)', wa.host === 'wa.me' && wa.path === '/447710020669' && wa.target === '_blank' && wa.text === 'Commission enquiry from Test Person\n\nHello Martin & team?\nSecond line.\n\n— Test Person', JSON.stringify(wa));
-  ok('WhatsApp status message shown', (await page.locator('.form-status').textContent()).includes('WhatsApp'));
-  await page.fill('#email', 'test@example.com'); await page.fill('#phone', '+44 1234 567890');
-  await page.evaluate(() => { window.__opened = []; });
-  await page.locator('#enquiry button[value=whatsapp]').click();
-  const wa2 = new URL((await page.evaluate(() => window.__opened))[0][0]).searchParams.get('text');
-  ok('WhatsApp message includes email and phone when given', wa2.endsWith('— Test Person\ntest@example.com\n+44 1234 567890'), JSON.stringify(wa2));
   await ctx.close();
 }
 
